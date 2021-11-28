@@ -1,4 +1,6 @@
 import pygame
+import math
+import random
 
 pygame.init()
 
@@ -44,27 +46,60 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
 
+        # Render Properties
         self.image = pygame.Surface((16, 16))
         self.image.fill('white')
         self.rect = self.image.get_rect(center = pos)
 
-        self.direction = pygame.math.Vector2(1, 0)
+        # Psysics Properties
+        self.previous_location = pygame.math.Vector2(WIDTH, HEIGHT/2)
+        self.direction = pygame.math.Vector2(0, 0)    
+        self.distance = 0
         self.speed = 3
+        self.side = 'left'
+
+        # Throw the ball
+        self.change_direction()
+
 
     def update(self, players):
-        self.rect.x += self.direction.x * self.speed
-        self.rect.y += self.direction.y * self.speed
 
-        for player in players:
-            if pygame.Rect.colliderect(self.rect, player) == True:
-                self.speed *= -1
-            
-
+        if pygame.Rect.colliderect(self.rect, players[0]) == True and self.side == 'left':
+            self.side = 'right'
+            self.change_direction()
+        elif pygame.Rect.colliderect(self.rect, players[1]) == True and self.side == 'right':
+            self.side = 'left'
+            self.change_direction()
+        
+        if self.distance:
+            self.distance -= 1
+            self.rect.x += self.direction.x
+            self.rect.y += self.direction.y
+   
 
     def draw(self):
-        WIN.blit(self.image, (self.rect.x, self.rect.y))
-        #pygame.draw.circle(WIN, 'white', (self.rect.x , self.rect.y), 10)
-        
+        pygame.draw.circle(WIN, 'white', (self.rect.x , self.rect.y), 10)
+    
+
+    def change_direction(self):
+
+        destination = pygame.math.Vector2(0, random.randint(0, HEIGHT))
+
+        if self.side == 'left':
+            destination.x = 0
+        else:
+            destination.x = WIDTH
+
+        pmx, pmy = self.previous_location
+
+        radians = math.atan2(destination.x - pmy, destination.y - pmx)
+        distance = math.hypot(destination.x - pmx, destination.y - pmy) / self.speed
+        self.distance = int(distance)
+
+        self.direction.x = math.cos(radians) * self.speed
+        self.direction.y = math.sin(radians) * self.speed
+
+        self.previous_location = destination
 
 def main():
 
