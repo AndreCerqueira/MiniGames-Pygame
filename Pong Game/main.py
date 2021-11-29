@@ -1,4 +1,4 @@
-import pygame
+import pygame, sys
 import math
 import random
 
@@ -7,7 +7,8 @@ pygame.init()
 FPS = 60
 VEL = 5
 WIDTH, HEIGHT = 900, 500
-PLAYER_WIDTH, PLAYER_HEIGHT = 30, 100
+PLAYER_WIDTH, PLAYER_HEIGHT = 10, 100
+FONT = pygame.font.SysFont('comicsans', 40)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Pong Game!")
 clock = pygame.time.Clock()
@@ -21,6 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect(topleft = pos)
 
+        self.score = 0
         self.up = up
         self.down = down
 
@@ -52,54 +54,29 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = pos)
 
         # Psysics Properties
-        self.previous_location = pygame.math.Vector2(WIDTH, HEIGHT/2)
-        self.direction = pygame.math.Vector2(0, 0)    
-        self.distance = 0
-        self.speed = 3
-        self.side = 'left'
-
-        # Throw the ball
-        self.change_direction()
+        self.velocity = pygame.math.Vector2(random.randint(4, 8), random.randint(-8, 8))
 
 
-    def update(self, players):
-
-        if pygame.Rect.colliderect(self.rect, players[0]) == True and self.side == 'left':
-            self.side = 'right'
-            self.change_direction()
-        elif pygame.Rect.colliderect(self.rect, players[1]) == True and self.side == 'right':
-            self.side = 'left'
-            self.change_direction()
-        
-        if self.distance:
-            self.distance -= 1
-            self.rect.x += self.direction.x
-            self.rect.y += self.direction.y
+    def update(self):
+        self.rect.x += self.velocity.x
+        self.rect.y += self.velocity.y
    
 
     def draw(self):
         pygame.draw.circle(WIN, 'white', (self.rect.x , self.rect.y), 10)
+
+
+    def bounce(self):
+        self.velocity.x *= -1
+        self.velocity.y = random.randint(-8, 8)
     
+def draw_scores(players):
 
-    def change_direction(self):
+    score_red = FONT.render(str(players[0].score), True, 'white')
+    score_blue = FONT.render(str(players[1].score), True, 'white')
 
-        destination = pygame.math.Vector2(0, random.randint(0, HEIGHT))
-
-        if self.side == 'left':
-            destination.x = 0
-        else:
-            destination.x = WIDTH
-
-        pmx, pmy = self.previous_location
-
-        radians = math.atan2(destination.x - pmy, destination.y - pmx)
-        distance = math.hypot(destination.x - pmx, destination.y - pmy) / self.speed
-        self.distance = int(distance)
-
-        self.direction.x = math.cos(radians) * self.speed
-        self.direction.y = math.sin(radians) * self.speed
-
-        self.previous_location = destination
+    WIN.blit(score_red, (30, 10))
+    WIN.blit(score_blue, (WIDTH-(score_blue.get_width()+30), 10))
 
 def main():
 
@@ -112,20 +89,36 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+                sys.exit()
 
-        WIN.fill('black')
+        # Detect collisions with borders
+        if ball.rect.x > WIDTH:
+            ball.velocity.x *= -1
+            player_red.score += 1
+
+        if ball.rect.x < 0:
+            ball.velocity.x *= -1
+            player_blue.score += 1
+
+        if ball.rect.y > HEIGHT or ball.rect.y < 0:
+            ball.velocity.y *= -1
+
+        # Detect collisions between the ball and the paddles
+        if pygame.sprite.collide_mask(ball, player_red) or pygame.sprite.collide_mask(ball, player_blue):
+            ball.bounce()
 
         player_red.update()
         player_blue.update()
+        ball.update()
 
-        ball.update((player_red, player_blue))
+        draw_scores((player_red, player_blue))
         ball.draw()
-
         player_red.draw()
         player_blue.draw()
 
         pygame.display.update()
         clock.tick(FPS)
+        WIN.fill('black')
 
 
 if __name__ == "__main__":
