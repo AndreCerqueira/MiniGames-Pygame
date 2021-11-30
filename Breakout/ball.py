@@ -1,6 +1,6 @@
 import pygame
 import random
-from settings import *
+from settings import WIDTH, HEIGHT
 
 
 # Ball
@@ -24,11 +24,9 @@ class Ball(pygame.sprite.Sprite):
         # Collision with borders
         if self.rect.x > WIDTH or self.rect.x < 0:
             self.velocity.x *= -1
-        if self.rect.y < 0: # self.rect.y > HEIGHT or 
+        if self.rect.y > HEIGHT or self.rect.y < 0: # self.rect.y > HEIGHT or 
             self.velocity.y *= -1
-        
 
     def bounce(self):
         self.velocity.x = random.randint(-8, 8)
         self.velocity.y *= -1
-        #self.velocity.y = random.randint(-8, 8)

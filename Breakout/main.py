@@ -1,10 +1,9 @@
 import pygame, sys
 
-from pygame import sprite
 from settings import *
 from player import Player
 from ball import Ball
-from tile import Tile
+from level import Level
 
 
 # Pygame setup
@@ -27,13 +26,7 @@ def main():
     player = Player(WIN, (WIDTH/2-50, HEIGHT-100), (100, 10))
     ball = Ball(WIN, (WIDTH/2-16, HEIGHT/2-16), (16, 16))
 
-    
-    tiles = pygame.sprite.Group()
-    for i in range(0, WIDTH, 10):
-        posX = 50 * i
-        tile = Tile((posX, 50))
-        tiles.add(tile)
-    
+    level = Level(LEVEL_MAP, WIN)
 
     # Game Loop
     while True:
@@ -46,8 +39,17 @@ def main():
         if pygame.sprite.collide_mask(ball, player):
             ball.bounce()
 
+        # Detect colision with tiles
+        for tile in level.tiles:
+            collision = tile.rect.colliderect(ball.rect)
+            if collision:
+                tile.durability -= 1
+                #ball.bounce()
+                #if tile.durability <= 0:
+                level.tiles.remove(tile)
+
         # Draw tiles
-        for tile in tiles:
+        for tile in level.tiles:
             WIN.blit(tile.image, tile.rect)
 
         WIN.blit(player.image, player.rect)
