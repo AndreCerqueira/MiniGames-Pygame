@@ -39,9 +39,9 @@ def collisions(ball, player, canvas, tiles):
 
 
 # Drawings
-def draw(ball, player, canvas, tiles):
+def draw(ball, player, canvas, level):
     # Draw tiles
-    for tile in tiles:
+    for tile in level.tiles:
         WIN.blit(tile.image, tile.rect)
 
     # Draw player and ball
@@ -49,7 +49,7 @@ def draw(ball, player, canvas, tiles):
     pygame.draw.circle(WIN, 'white', (ball.rect.x, ball.rect.y), 10)
 
     # Draw Canvas
-    canvas.draw()
+    canvas.draw(str(level.current_level))
 
 
 def main():
@@ -67,12 +67,13 @@ def main():
         # Update Movements
         player.update()
         ball.update()
+        level.update()
 
         # Check Collisions
         collisions(ball, player, canvas, level.tiles)
 
         # Draw Everything
-        draw(ball, player, canvas, level.tiles)
+        draw(ball, player, canvas, level)
 
         pygame.display.update()
         clock.tick(60)

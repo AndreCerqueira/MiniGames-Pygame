@@ -20,8 +20,8 @@ class Canvas():
             position.x += 60
             self.lives_image.append(item)
 
-        font = pygame.font.SysFont('comicsans', 20)
-        self.level_text = font.render("Level 1", True, 'white')
+        self.font = pygame.font.SysFont('comicsans', 20)
+        self.level_text = self.font.render("Level 1", True, 'white')
         
 
     # Get Lives Value Function
@@ -41,13 +41,14 @@ class Canvas():
         else:
             self.game_over()
 
-    def draw(self):
+    def draw(self, level):
         
         # Lives
         for live in self.lives_image:
             self.win.blit(live.image, live.rect)
 
         # Level Text
+        self.level_text = self.font.render("Level " + level, True, 'white')
         self.win.blit(self.level_text, (WIDTH-(self.level_text.get_width()+20), HEIGHT-(self.level_text.get_height()+20)))
 
 
