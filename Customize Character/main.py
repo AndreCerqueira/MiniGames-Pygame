@@ -1,4 +1,5 @@
 import pygame, sys, os
+from utilis import change_sprite
 
 # Pygame setup
 pygame.init()
@@ -21,32 +22,21 @@ L_ARROW = pygame.transform.scale(L_ARROW, (L_ARROW.get_size()[0] * 5, L_ARROW.ge
 R_ARROW = pygame.image.load(os.path.join('images/ui/arrow_right.png'))
 R_ARROW = pygame.transform.scale(R_ARROW, (R_ARROW.get_size()[0] * 5, R_ARROW.get_size()[1] * 5))
 
-PLAYER_IMAGE = pygame.image.load(os.path.join('images/player2.png'))
+PLAYER_IMAGE_PATH = 'images/player2.png'
+PLAYER_IMAGE = pygame.image.load(os.path.join(PLAYER_IMAGE_PATH))
 PLAYER_IMAGE = pygame.transform.scale(PLAYER_IMAGE, (PLAYER_IMAGE.get_size()[0] * 5, PLAYER_IMAGE.get_size()[1] * 5))
 
 # HATS
-HAT1_IMAGE = pygame.image.load(os.path.join('images/hat.png'))
+HAT1_IMAGE_PATH = 'images/hat.png'
+HAT2_IMAGE_PATH = 'images/hat2.png'
+HAT1_IMAGE = pygame.image.load(os.path.join(HAT1_IMAGE_PATH))
 HAT1_IMAGE = pygame.transform.scale(HAT1_IMAGE, (HAT1_IMAGE.get_size()[0] * 5, HAT1_IMAGE.get_size()[1] * 5))
-HAT2_IMAGE = pygame.image.load(os.path.join('images/hat2.png'))
+HAT2_IMAGE = pygame.image.load(os.path.join(HAT2_IMAGE_PATH))
 HAT2_IMAGE = pygame.transform.scale(HAT2_IMAGE, (HAT2_IMAGE.get_size()[0] * 5, HAT2_IMAGE.get_size()[1] * 5))
 
+
 hats = (HAT1_IMAGE, HAT2_IMAGE)
-
-current_hat = 0
-
-def events():
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        if event.type == pygame.MOUSEBUTTONUP:
-            
-            if (current_hat+1 > len(hats)-1):
-                current_hat = 0
-            else:
-                print(current_hat)
-                current_hat += 1
-
+hats_paths = ('images/hat.png', 'images/hat2.png')
 
 def next_cicle_update():
     pygame.display.update()
@@ -54,17 +44,26 @@ def next_cicle_update():
     WIN.fill(bgColor)
 
 
+
 def main():
 
-    current_hat = 0
+    current_hat_index = 0
     
     while True:
-        events()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    current_hat_index += 1
+                    if current_hat_index >= len(hats):
+                        current_hat_index = 0
+
+                    change_sprite(PLAYER_IMAGE_PATH, hats_paths[current_hat_index])
 
         # Player
         WIN.blit(PLAYER_IMAGE, (50, HEIGHT/2-PLAYER_IMAGE.get_height()/2))
-
-        # Canvas
 
         # UI HAT
         WIN.blit(TEXT_BACK_IMAGE, (WIDTH-300, 50))
@@ -72,7 +71,8 @@ def main():
         WIN.blit(hat_text, (WIDTH - 200, 60))
         WIN.blit(L_ARROW, (WIDTH-300, 150))
         WIN.blit(R_ARROW, (WIDTH-85, 150))
-        WIN.blit(hats[current_hat], (WIDTH-250, 150))
+        WIN.blit(hats[current_hat_index], (WIDTH-250, 150))
+
 
         next_cicle_update()
 
